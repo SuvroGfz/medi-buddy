@@ -20,13 +20,19 @@ export async function setupNotifications(): Promise<void> {
   });
 
   if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync('med-alarm', {
-      name: 'Medicine Alarms',
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#14746F',
-      lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
-    });
+    try {
+      await Notifications.setNotificationChannelAsync('med-alarm', {
+        name: 'Medicine Alarms',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#14746F',
+        lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+      });
+    } catch (e) {
+      // Notification channels are not fully supported in Expo Go;
+      // they work in development/production builds.
+      console.warn('Notification channel setup skipped (Expo Go):', (e as Error).message);
+    }
   }
 }
 
