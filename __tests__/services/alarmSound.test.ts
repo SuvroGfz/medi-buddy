@@ -1,6 +1,3 @@
-import { playAlarmTone, stopAlarmTone, previewTone } from '../../src/services/alarmSound';
-
-// Mock the require calls for sound files
 jest.mock('../../assets/sounds/gentle_chime.wav', () => 'gentle_chime_asset', { virtual: true });
 jest.mock('../../assets/sounds/steady_pulse.wav', () => 'steady_pulse_asset', { virtual: true });
 jest.mock('../../assets/sounds/bright_alert.wav', () => 'bright_alert_asset', { virtual: true });
@@ -13,13 +10,14 @@ describe('Alarm Sound Service', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Reset the expo-av mock for each test
     const { Audio } = require('expo-av');
     Audio.Sound.createAsync.mockResolvedValue({ sound: mockSound });
   });
 
   it('plays a tone with looping enabled', async () => {
+    const { playAlarmTone } = require('../../src/services/alarmSound');
     const { Audio } = require('expo-av');
+
     await playAlarmTone('gentle_chime');
 
     expect(Audio.setAudioModeAsync).toHaveBeenCalledWith(
@@ -40,7 +38,9 @@ describe('Alarm Sound Service', () => {
   });
 
   it('previews a tone without looping', async () => {
+    const { previewTone } = require('../../src/services/alarmSound');
     const { Audio } = require('expo-av');
+
     await previewTone('steady_pulse');
 
     expect(Audio.Sound.createAsync).toHaveBeenCalledWith(
@@ -53,7 +53,7 @@ describe('Alarm Sound Service', () => {
   });
 
   it('stopAlarmTone does nothing when no sound is playing', async () => {
-    // Should not throw
+    const { stopAlarmTone } = require('../../src/services/alarmSound');
     await expect(stopAlarmTone()).resolves.not.toThrow();
   });
 });

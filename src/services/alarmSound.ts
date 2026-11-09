@@ -1,5 +1,4 @@
 import { AlarmToneKey } from '../types';
-import { Platform } from 'react-native';
 
 const TONE_FILES: Record<AlarmToneKey, any> = {
   gentle_chime: require('../../assets/sounds/gentle_chime.wav'),
@@ -9,13 +8,29 @@ const TONE_FILES: Record<AlarmToneKey, any> = {
 
 let currentSound: any = null;
 
-/** Safely get the Audio API — returns null if expo-av native module is missing (Expo Go) */
-function getAudioAPI(): { Sound: any; setAudioModeAsync: any } | null {
+/**
+ * Lazily load the expo-av Audio API at call time.
+ *
+ * We need to avoid two failure modes:
+ * 1. Metro statically resolves `require('expo-av')` at bundle time, which
+ *    triggers the ExponentAV native module check and crashes in Expo Go.
+ * 2. Jest doesn't support dynamic `import()` without --experimental-vm-modules.
+ *
+ * Solution: use an indirect require via a computed module name. Metro's static
+ * analysis only follows literal string arguments to require(), so it does not
+ * bundle expo-av eagerly. At runtime the require executes inside a try-catch,
+ * so a missing native module is caught gracefully. In Jest the module is mocked
+ * and require() resolves to the mock.
+ */
+function getAudioAPI(): any | null {
   try {
-    // This will throw if the ExponentAV native module is not available
-    const { Audio } = require('expo-av');
-    // Trigger native module resolution by accessing a property
-    if (Audio && Audio.Sound) return Audio;
+    // Indirect require — Metro cannot statically analyze this,
+    // so it won't try to resolve the module at bundle time.
+    const moduleName = ['expo', 'av'].join('-');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const mod = require(moduleName);
+    const Audio = mod?.Audio;
+    if (Audio?.Sound) return Audio;
     return null;
   } catch {
     return null;

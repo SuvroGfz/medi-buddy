@@ -17,8 +17,8 @@ import {
   getNotificationSettings,
   saveNotificationSettings,
 } from '../../src/services/notifications';
-import { previewTone, stopAlarmTone } from '../../src/services/alarmSound';
 import { countMedicationsForPreset } from '../../src/db/presets';
+import { previewTone } from '../../src/services/alarmSound';
 
 export default function SettingsScreen() {
   const { presets, loading, loadPresets, removePreset } = usePresetStore();

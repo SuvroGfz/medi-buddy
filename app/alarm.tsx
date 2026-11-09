@@ -10,9 +10,8 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { colors, typography, spacing, borderRadius } from '../src/theme';
 import { Button } from '../src/components';
+import { getNotificationSettings, scheduleSnooze } from '../src/services/notifications';
 import { playAlarmTone, stopAlarmTone } from '../src/services/alarmSound';
-import { getNotificationSettings } from '../src/services/notifications';
-import { scheduleSnooze } from '../src/services/notifications';
 import { logIntake } from '../src/db/intake';
 import { formatTime } from '../src/utils/time';
 
