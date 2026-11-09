@@ -1,6 +1,6 @@
 /** SQLite schema definitions and migrations for MediBuddy */
 
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 export const CREATE_TABLES = `
 CREATE TABLE IF NOT EXISTS time_presets (

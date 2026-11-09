@@ -8,18 +8,20 @@ let db: SQLite.SQLiteDatabase | null = null;
 export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
   if (db) return db;
 
-  db = await SQLite.openDatabaseAsync('medibuddy.db');
+  const instance = await SQLite.openDatabaseAsync('medibuddy.db');
 
   // Enable WAL mode and foreign keys
-  await db.execAsync('PRAGMA journal_mode = WAL;');
-  await db.execAsync('PRAGMA foreign_keys = ON;');
+  await instance.execAsync('PRAGMA journal_mode = WAL;');
+  await instance.execAsync('PRAGMA foreign_keys = ON;');
 
   // Run schema creation
-  await db.execAsync(CREATE_TABLES);
+  await instance.execAsync(CREATE_TABLES);
 
   // Check and run migrations
-  await runMigrations(db);
+  await runMigrations(instance);
 
+  // Only cache after successful init
+  db = instance;
   return db;
 }
 
@@ -35,7 +37,8 @@ async function runMigrations(database: SQLite.SQLiteDatabase): Promise<void> {
       await seedDefaultPresets(database);
     }
 
-    if (currentVersion < 2) {
+    // Run dedup regardless — covers both fresh v2 failures and re-runs
+    if (currentVersion < 3) {
       await deduplicatePresets(database);
     }
 
@@ -66,28 +69,42 @@ async function seedDefaultPresets(database: SQLite.SQLiteDatabase): Promise<void
 
 /** Remove duplicate presets (keep the earliest created row per name) and add UNIQUE constraint */
 async function deduplicatePresets(database: SQLite.SQLiteDatabase): Promise<void> {
-  await database.execAsync(`
-    -- Keep one row per name
-    DELETE FROM time_presets
-    WHERE id NOT IN (
-      SELECT MIN(id) FROM time_presets GROUP BY name
-    );
+  // Temporarily disable foreign keys for the table rebuild
+  await database.execAsync('PRAGMA foreign_keys = OFF;');
 
-    -- Rebuild table with UNIQUE on name
-    CREATE TABLE IF NOT EXISTS time_presets_new (
-      id          TEXT PRIMARY KEY,
-      name        TEXT NOT NULL UNIQUE,
-      time        TEXT NOT NULL,
-      icon        TEXT NOT NULL DEFAULT '💊',
-      sort_order  INTEGER DEFAULT 0,
-      created_at  TEXT NOT NULL,
-      updated_at  TEXT NOT NULL
-    );
+  try {
+    // Step 1: Find and delete duplicates — keep the row with the smallest rowid per name
+    await database.runAsync(`
+      DELETE FROM time_presets
+      WHERE rowid NOT IN (
+        SELECT MIN(rowid) FROM time_presets GROUP BY name
+      )
+    `);
 
-    INSERT OR IGNORE INTO time_presets_new SELECT * FROM time_presets;
-    DROP TABLE time_presets;
-    ALTER TABLE time_presets_new RENAME TO time_presets;
-  `);
+    // Step 2: Rebuild table with UNIQUE constraint
+    await database.execAsync(`
+      CREATE TABLE IF NOT EXISTS time_presets_new (
+        id          TEXT PRIMARY KEY,
+        name        TEXT NOT NULL UNIQUE,
+        time        TEXT NOT NULL,
+        icon        TEXT NOT NULL DEFAULT '💊',
+        sort_order  INTEGER DEFAULT 0,
+        created_at  TEXT NOT NULL,
+        updated_at  TEXT NOT NULL
+      );
+    `);
+
+    await database.execAsync(`
+      INSERT OR IGNORE INTO time_presets_new
+        SELECT id, name, time, icon, sort_order, created_at, updated_at
+        FROM time_presets;
+    `);
+
+    await database.execAsync('DROP TABLE IF EXISTS time_presets;');
+    await database.execAsync('ALTER TABLE time_presets_new RENAME TO time_presets;');
+  } finally {
+    await database.execAsync('PRAGMA foreign_keys = ON;');
+  }
 }
 
 /** Close the database (for testing) */
