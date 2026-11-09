@@ -1,16 +1,32 @@
-import { Audio } from 'expo-av';
 import { AlarmToneKey } from '../types';
+import { Platform } from 'react-native';
 
-const TONE_FILES: Record<AlarmToneKey, ReturnType<typeof require>> = {
+const TONE_FILES: Record<AlarmToneKey, any> = {
   gentle_chime: require('../../assets/sounds/gentle_chime.wav'),
   steady_pulse: require('../../assets/sounds/steady_pulse.wav'),
   bright_alert: require('../../assets/sounds/bright_alert.wav'),
 };
 
-let currentSound: Audio.Sound | null = null;
+let currentSound: any = null;
+
+/** Safely get the Audio API — returns null if expo-av native module is missing (Expo Go) */
+function getAudioAPI(): { Sound: any; setAudioModeAsync: any } | null {
+  try {
+    // This will throw if the ExponentAV native module is not available
+    const { Audio } = require('expo-av');
+    // Trigger native module resolution by accessing a property
+    if (Audio && Audio.Sound) return Audio;
+    return null;
+  } catch {
+    return null;
+  }
+}
 
 /** Play the selected alarm tone in a loop */
 export async function playAlarmTone(tone: AlarmToneKey): Promise<void> {
+  const Audio = getAudioAPI();
+  if (!Audio) return;
+
   try {
     await stopAlarmTone();
 
@@ -48,6 +64,9 @@ export async function stopAlarmTone(): Promise<void> {
 
 /** Play a short preview of a tone (for settings) */
 export async function previewTone(tone: AlarmToneKey): Promise<void> {
+  const Audio = getAudioAPI();
+  if (!Audio) return;
+
   try {
     await stopAlarmTone();
 

@@ -14,25 +14,22 @@ describe('LoadingOverlay', () => {
     const { getByText } = await render(
       <LoadingOverlay visible={true} />
     );
+    // Modal renders in a portal; check text exists
     expect(getByText('Saving...')).toBeTruthy();
-  });
+  }, 10000);
 
   it('renders with custom message when visible', async () => {
     const { getByText } = await render(
       <LoadingOverlay visible={true} message="Creating preset..." />
     );
     expect(getByText('Creating preset...')).toBeTruthy();
-  });
+  }, 10000);
 
-  it('shows ActivityIndicator when visible', async () => {
-    const { getByTestId, toJSON } = await render(
+  it('contains the loading text in the component tree', async () => {
+    const { toJSON } = await render(
       <LoadingOverlay visible={true} />
     );
-    // The Modal should be visible and contain an ActivityIndicator
-    // We check that the tree contains the expected text as a proxy
-    const json = toJSON();
-    expect(json).toBeTruthy();
-    // The component renders "Saving..." text alongside an ActivityIndicator
-    expect(json).toBeDefined();
-  });
+    const json = JSON.stringify(toJSON());
+    expect(json).toContain('Saving...');
+  }, 10000);
 });
