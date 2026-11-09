@@ -63,12 +63,22 @@ export interface NotificationSettings {
   soundEnabled: boolean;
   vibrationEnabled: boolean;
   snoozeDurationMinutes: number;
+  alarmTone: AlarmToneKey;
 }
+
+export type AlarmToneKey = 'gentle_chime' | 'steady_pulse' | 'bright_alert';
+
+export const ALARM_TONES: Record<AlarmToneKey, { label: string; icon: string }> = {
+  gentle_chime: { label: 'Gentle Chime', icon: '🎵' },
+  steady_pulse: { label: 'Steady Pulse', icon: '🔔' },
+  bright_alert: { label: 'Bright Alert', icon: '⚡' },
+};
 
 export const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
   soundEnabled: true,
   vibrationEnabled: true,
   snoozeDurationMinutes: 10,
+  alarmTone: 'gentle_chime',
 };
 
 export const ALL_DAYS = '1,2,3,4,5,6,7';

@@ -17,7 +17,7 @@ import { colors, typography, spacing, borderRadius, touchTarget } from '../../sr
 import { useMedicationStore } from '../../src/stores/useMedicationStore';
 import { usePresetStore } from '../../src/stores/usePresetStore';
 import { useScheduleStore } from '../../src/stores/useScheduleStore';
-import { Button, PresetChip, DaySelector } from '../../src/components';
+import { Button, PresetChip, DaySelector, LoadingOverlay } from '../../src/components';
 import { MedicationSchedule, ALL_DAYS } from '../../src/types';
 import { formatTime } from '../../src/utils/time';
 import { format } from 'date-fns';
@@ -180,6 +180,7 @@ export default function MedicationDetailScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      <LoadingOverlay visible={saving} message="Saving..." />
       <ScrollView contentContainerStyle={styles.content}>
         {/* Medication Info */}
         <View style={styles.section}>

@@ -3,6 +3,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View, StyleSheet } from 'react-native';
 import * as Notifications from 'expo-notifications';
+import { router } from 'expo-router';
 import { colors } from '../src/theme';
 import { setupNotifications } from '../src/services/notifications';
 import { getDatabase } from '../src/db/migrations';
@@ -10,7 +11,8 @@ import { getDatabase } from '../src/db/migrations';
 // Set up notification handler immediately
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
   }),
@@ -31,21 +33,55 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    // Listen for notification responses (Take / Snooze)
-    const subscription = Notifications.addNotificationResponseReceivedListener(
-      (response) => {
-        const data = response.notification.request.content.data;
-        console.log('Notification tapped:', data);
-        // Navigation to today screen is handled by default since it's the home tab
+    // Navigate to alarm screen when a notification is received in foreground
+    const receivedSub = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        const data = notification.request.content.data;
+        if (data?.scheduleId) {
+          router.push({
+            pathname: '/alarm',
+            params: {
+              scheduleId: data.scheduleId as string,
+              medicationId: data.medicationId as string,
+              medicationName: data.medicationName as string,
+              dosage: (data.dosage as string) ?? '',
+              scheduledTime: data.scheduledTime as string,
+              presetName: (data.presetName as string) ?? '',
+            },
+          });
+        }
       }
     );
 
-    return () => subscription.remove();
+    // Navigate to alarm screen when user taps a notification
+    const responseSub = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        const data = response.notification.request.content.data;
+        if (data?.scheduleId) {
+          router.push({
+            pathname: '/alarm',
+            params: {
+              scheduleId: data.scheduleId as string,
+              medicationId: data.medicationId as string,
+              medicationName: data.medicationName as string,
+              dosage: (data.dosage as string) ?? '',
+              scheduledTime: data.scheduledTime as string,
+              presetName: (data.presetName as string) ?? '',
+            },
+          });
+        }
+      }
+    );
+
+    return () => {
+      receivedSub.remove();
+      responseSub.remove();
+    };
   }, []);
 
   return (
     <View style={styles.container}>
-      <StatusBar style="light" backgroundColor={colors.statusBar} />
+      <StatusBar style="light" />
       <Stack
         screenOptions={{
           headerStyle: { backgroundColor: colors.primaryDark },
@@ -79,6 +115,14 @@ export default function RootLayout() {
           name="preset/[id]"
           options={{
             title: 'Edit Time Preset',
+          }}
+        />
+        <Stack.Screen
+          name="alarm"
+          options={{
+            headerShown: false,
+            presentation: 'fullScreenModal',
+            animation: 'fade',
           }}
         />
       </Stack>

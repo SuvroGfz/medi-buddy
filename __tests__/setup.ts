@@ -45,3 +45,18 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 jest.mock('expo-crypto', () => ({
   randomUUID: jest.fn(() => 'mock-uuid-' + Math.random().toString(36).substring(7)),
 }));
+
+// Mock expo-av
+jest.mock('expo-av', () => ({
+  Audio: {
+    Sound: {
+      createAsync: jest.fn().mockResolvedValue({
+        sound: {
+          stopAsync: jest.fn().mockResolvedValue(undefined),
+          unloadAsync: jest.fn().mockResolvedValue(undefined),
+        },
+      }),
+    },
+    setAudioModeAsync: jest.fn().mockResolvedValue(undefined),
+  },
+}));

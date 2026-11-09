@@ -12,7 +12,7 @@ import {
 import { router } from 'expo-router';
 import { colors, typography, spacing, borderRadius } from '../../src/theme';
 import { useMedicationStore } from '../../src/stores/useMedicationStore';
-import { Button } from '../../src/components';
+import { Button, LoadingOverlay } from '../../src/components';
 
 export default function AddMedicationScreen() {
   const { addMedication } = useMedicationStore();
@@ -48,6 +48,7 @@ export default function AddMedicationScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      <LoadingOverlay visible={saving} message="Saving medication..." />
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.field}>
           <Text style={styles.label}>Medication Name *</Text>

@@ -13,7 +13,8 @@ const SETTINGS_KEY = '@medibuddy:notification_settings';
 export async function setupNotifications(): Promise<void> {
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
-      shouldShowAlert: true,
+      shouldShowBanner: true,
+      shouldShowList: true,
       shouldPlaySound: true,
       shouldSetBadge: true,
     }),

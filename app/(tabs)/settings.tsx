@@ -12,11 +12,12 @@ import { useFocusEffect, router } from 'expo-router';
 import { colors, typography, spacing, borderRadius, touchTarget } from '../../src/theme';
 import { usePresetStore } from '../../src/stores/usePresetStore';
 import { PresetChip } from '../../src/components';
-import { NotificationSettings, DEFAULT_NOTIFICATION_SETTINGS } from '../../src/types';
+import { NotificationSettings, DEFAULT_NOTIFICATION_SETTINGS, ALARM_TONES, AlarmToneKey } from '../../src/types';
 import {
   getNotificationSettings,
   saveNotificationSettings,
 } from '../../src/services/notifications';
+import { previewTone, stopAlarmTone } from '../../src/services/alarmSound';
 import { countMedicationsForPreset } from '../../src/db/presets';
 
 export default function SettingsScreen() {
@@ -53,7 +54,7 @@ export default function SettingsScreen() {
 
   const updateSetting = async (
     key: keyof NotificationSettings,
-    value: boolean | number
+    value: boolean | number | string
   ) => {
     const updated = { ...settings, [key]: value };
     setSettings(updated);
@@ -176,6 +177,40 @@ export default function SettingsScreen() {
             ))}
           </View>
         </View>
+
+        <View style={styles.settingRow}>
+          <Text style={styles.settingLabel}>Alarm Tone</Text>
+        </View>
+        <View style={styles.toneOptions}>
+          {(Object.entries(ALARM_TONES) as [AlarmToneKey, { label: string; icon: string }][]).map(
+            ([key, { label, icon }]) => (
+              <TouchableOpacity
+                key={key}
+                style={[
+                  styles.tonePill,
+                  settings.alarmTone === key && styles.tonePillActive,
+                ]}
+                onPress={() => {
+                  updateSetting('alarmTone', key);
+                  previewTone(key);
+                }}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: settings.alarmTone === key }}
+                accessibilityLabel={`${label} alarm tone`}
+              >
+                <Text style={styles.toneIcon}>{icon}</Text>
+                <Text
+                  style={[
+                    styles.toneText,
+                    settings.alarmTone === key && styles.toneTextActive,
+                  ]}
+                >
+                  {label}
+                </Text>
+              </TouchableOpacity>
+            )
+          )}
+        </View>
       </View>
 
       {/* About */}
@@ -268,5 +303,37 @@ const styles = StyleSheet.create({
     ...typography.bodySmall,
     color: colors.textSecondary,
     lineHeight: 22,
+  },
+  toneOptions: {
+    gap: spacing.sm,
+    marginTop: spacing.xs,
+  },
+  tonePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.card,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    minHeight: touchTarget.min,
+    gap: spacing.md,
+  },
+  tonePillActive: {
+    backgroundColor: colors.surface,
+    borderColor: colors.primary,
+    borderWidth: 2,
+  },
+  toneIcon: {
+    fontSize: 20,
+  },
+  toneText: {
+    ...typography.body,
+    color: colors.textSecondary,
+  },
+  toneTextActive: {
+    color: colors.primary,
+    fontWeight: '600',
   },
 });

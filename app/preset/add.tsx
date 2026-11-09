@@ -14,7 +14,7 @@ import { router } from 'expo-router';
 import { format, parse } from 'date-fns';
 import { colors, typography, spacing, borderRadius, touchTarget } from '../../src/theme';
 import { usePresetStore } from '../../src/stores/usePresetStore';
-import { Button } from '../../src/components';
+import { Button, LoadingOverlay } from '../../src/components';
 import { formatTime } from '../../src/utils/time';
 
 const ICONS = ['🌅', '🌞', '☀️', '🌤️', '🌆', '🌙', '😴', '💊', '🍳', '🥗', '🍽️', '⏰'];
@@ -52,6 +52,7 @@ export default function AddPresetScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <LoadingOverlay visible={saving} message="Creating preset..." />
       <View style={styles.field}>
         <Text style={styles.label}>Preset Name *</Text>
         <TextInput
