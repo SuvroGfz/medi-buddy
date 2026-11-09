@@ -41,7 +41,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
   },
 }));
 
-// Mock uuid
-jest.mock('uuid', () => ({
-  v4: jest.fn(() => 'mock-uuid-' + Math.random().toString(36).substring(7)),
+// Mock expo-crypto
+jest.mock('expo-crypto', () => ({
+  randomUUID: jest.fn(() => 'mock-uuid-' + Math.random().toString(36).substring(7)),
 }));
