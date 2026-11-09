@@ -35,6 +35,10 @@ async function runMigrations(database: SQLite.SQLiteDatabase): Promise<void> {
       await seedDefaultPresets(database);
     }
 
+    if (currentVersion < 2) {
+      await deduplicatePresets(database);
+    }
+
     await database.runAsync(
       'INSERT OR REPLACE INTO schema_version (version) VALUES (?)',
       SCHEMA_VERSION
@@ -43,17 +47,11 @@ async function runMigrations(database: SQLite.SQLiteDatabase): Promise<void> {
 }
 
 async function seedDefaultPresets(database: SQLite.SQLiteDatabase): Promise<void> {
-  const existing = await database.getFirstAsync<{ count: number }>(
-    'SELECT COUNT(*) as count FROM time_presets'
-  );
-
-  if (existing && existing.count > 0) return;
-
   const now = nowISO();
   for (const preset of SEED_PRESETS) {
     const id = generateId();
     await database.runAsync(
-      `INSERT INTO time_presets (id, name, time, icon, sort_order, created_at, updated_at)
+      `INSERT OR IGNORE INTO time_presets (id, name, time, icon, sort_order, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
       id,
       preset.name,
@@ -64,6 +62,32 @@ async function seedDefaultPresets(database: SQLite.SQLiteDatabase): Promise<void
       now
     );
   }
+}
+
+/** Remove duplicate presets (keep the earliest created row per name) and add UNIQUE constraint */
+async function deduplicatePresets(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    -- Keep one row per name
+    DELETE FROM time_presets
+    WHERE id NOT IN (
+      SELECT MIN(id) FROM time_presets GROUP BY name
+    );
+
+    -- Rebuild table with UNIQUE on name
+    CREATE TABLE IF NOT EXISTS time_presets_new (
+      id          TEXT PRIMARY KEY,
+      name        TEXT NOT NULL UNIQUE,
+      time        TEXT NOT NULL,
+      icon        TEXT NOT NULL DEFAULT '💊',
+      sort_order  INTEGER DEFAULT 0,
+      created_at  TEXT NOT NULL,
+      updated_at  TEXT NOT NULL
+    );
+
+    INSERT OR IGNORE INTO time_presets_new SELECT * FROM time_presets;
+    DROP TABLE time_presets;
+    ALTER TABLE time_presets_new RENAME TO time_presets;
+  `);
 }
 
 /** Close the database (for testing) */

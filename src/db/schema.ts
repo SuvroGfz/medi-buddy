@@ -1,11 +1,11 @@
 /** SQLite schema definitions and migrations for MediBuddy */
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export const CREATE_TABLES = `
 CREATE TABLE IF NOT EXISTS time_presets (
   id          TEXT PRIMARY KEY,
-  name        TEXT NOT NULL,
+  name        TEXT NOT NULL UNIQUE,
   time        TEXT NOT NULL,
   icon        TEXT NOT NULL DEFAULT '💊',
   sort_order  INTEGER DEFAULT 0,
