@@ -1,12 +1,17 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View, StyleSheet } from 'react-native';
 import * as Notifications from 'expo-notifications';
+import * as SplashScreen from 'expo-splash-screen';
 import { router } from 'expo-router';
 import { colors } from '../src/theme';
 import { setupNotifications } from '../src/services/notifications';
 import { getDatabase } from '../src/db/migrations';
+import { isOnboardingComplete } from '../src/services/userProfile';
+
+// Keep the splash screen visible while we load
+SplashScreen.preventAutoHideAsync();
 
 // Set up notification handler immediately
 Notifications.setNotificationHandler({
@@ -19,18 +24,35 @@ Notifications.setNotificationHandler({
 });
 
 export default function RootLayout() {
+  const [appReady, setAppReady] = useState(false);
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
+
   useEffect(() => {
-    // Initialize database and notifications on app start
     async function init() {
       try {
         await getDatabase();
         await setupNotifications();
+        const onboarded = await isOnboardingComplete();
+        setNeedsOnboarding(!onboarded);
       } catch (e) {
         console.error('Initialization error:', e);
+      } finally {
+        setAppReady(true);
       }
     }
     init();
   }, []);
+
+  const onLayoutReady = useCallback(async () => {
+    if (appReady) {
+      await SplashScreen.hideAsync();
+
+      // Navigate to onboarding if this is the first launch
+      if (needsOnboarding) {
+        router.replace('/onboarding');
+      }
+    }
+  }, [appReady, needsOnboarding]);
 
   useEffect(() => {
     // Navigate to alarm screen when a notification is received in foreground
@@ -79,8 +101,12 @@ export default function RootLayout() {
     };
   }, []);
 
+  if (!appReady) {
+    return null; // Splash screen is still showing
+  }
+
   return (
-    <View style={styles.container}>
+    <View style={styles.container} onLayout={onLayoutReady}>
       <StatusBar style="light" />
       <Stack
         screenOptions={{
@@ -91,6 +117,13 @@ export default function RootLayout() {
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="onboarding"
+          options={{
+            headerShown: false,
+            animation: 'fade',
+          }}
+        />
         <Stack.Screen
           name="medication/add"
           options={{

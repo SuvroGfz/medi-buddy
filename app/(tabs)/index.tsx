@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import { colors, typography, spacing, borderRadius } from '../../src/theme';
 import { useScheduleStore } from '../../src/stores/useScheduleStore';
 import { TimelineItem, EmptyState, Button } from '../../src/components';
 import { formatTime, isTodayScheduled } from '../../src/utils/time';
+import { getUserProfile } from '../../src/services/userProfile';
 
 export default function TodayScreen() {
   const {
@@ -22,6 +23,7 @@ export default function TodayScreen() {
     loadIntakeLogs,
     logAction,
   } = useScheduleStore();
+  const [userName, setUserName] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     await loadTodaySchedules();
@@ -31,6 +33,7 @@ export default function TodayScreen() {
   useFocusEffect(
     useCallback(() => {
       refresh();
+      getUserProfile().then((p) => setUserName(p?.name ?? null));
     }, [refresh])
   );
 
@@ -62,7 +65,9 @@ export default function TodayScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.dateHeader}>
-        <Text style={styles.greeting}>Good day! 👋</Text>
+        <Text style={styles.greeting}>
+          {userName ? `Hi, ${userName}! 👋` : 'Good day! 👋'}
+        </Text>
         <Text style={styles.date}>{todayDate}</Text>
       </View>
 
