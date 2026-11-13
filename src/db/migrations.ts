@@ -1,4 +1,5 @@
 import * as SQLite from 'expo-sqlite';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CREATE_TABLES, SCHEMA_VERSION, SEED_PRESETS } from './schema';
 import { generateId } from '../utils/uuid';
 import { nowISO } from '../utils/time';
@@ -40,6 +41,10 @@ async function runMigrations(database: SQLite.SQLiteDatabase): Promise<void> {
     // Run dedup regardless — covers both fresh v2 failures and re-runs
     if (currentVersion < 3) {
       await deduplicatePresets(database);
+    }
+
+    if (currentVersion < 4) {
+      await migrateToV4(database);
     }
 
     await database.runAsync(
@@ -104,6 +109,59 @@ async function deduplicatePresets(database: SQLite.SQLiteDatabase): Promise<void
     await database.execAsync('ALTER TABLE time_presets_new RENAME TO time_presets;');
   } finally {
     await database.execAsync('PRAGMA foreign_keys = ON;');
+  }
+}
+
+/** Migrate to v4: add profiles table, add profile_id to medications, migrate onboarding user */
+async function migrateToV4(database: SQLite.SQLiteDatabase): Promise<void> {
+  // Create profiles table (IF NOT EXISTS handles fresh installs)
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS profiles (
+      id          TEXT PRIMARY KEY,
+      name        TEXT NOT NULL,
+      age         INTEGER NOT NULL,
+      avatar_emoji TEXT NOT NULL DEFAULT '👤',
+      is_default  INTEGER NOT NULL DEFAULT 0,
+      created_at  TEXT NOT NULL
+    );
+  `);
+
+  // Add profile_id column to medications if not already present
+  const columns = await database.getAllAsync<any>(
+    "PRAGMA table_info(medications)"
+  );
+  const hasProfileId = columns.some((c: any) => c.name === 'profile_id');
+  if (!hasProfileId) {
+    await database.execAsync(
+      'ALTER TABLE medications ADD COLUMN profile_id TEXT REFERENCES profiles(id)'
+    );
+  }
+
+  // Migrate the existing onboarding user into a profile
+  try {
+    const raw = await AsyncStorage.getItem('@medibuddy_user_profile');
+    if (raw) {
+      const user = JSON.parse(raw) as { name: string; age: number };
+      const profileId = generateId();
+      const now = nowISO();
+
+      await database.runAsync(
+        `INSERT INTO profiles (id, name, age, avatar_emoji, is_default, created_at)
+         VALUES (?, ?, ?, '👤', 1, ?)`,
+        profileId,
+        user.name,
+        user.age,
+        now
+      );
+
+      // Point all existing medications to this profile
+      await database.runAsync(
+        'UPDATE medications SET profile_id = ? WHERE profile_id IS NULL',
+        profileId
+      );
+    }
+  } catch {
+    // AsyncStorage read failed — skip migration of existing user
   }
 }
 

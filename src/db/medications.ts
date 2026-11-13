@@ -3,13 +3,28 @@ import { Medication } from '../types';
 import { generateId } from '../utils/uuid';
 import { nowISO } from '../utils/time';
 
-/** Get all medications, optionally filtered by active status */
-export async function getAllMedications(activeOnly = false): Promise<Medication[]> {
+/** Get all medications, optionally filtered by active status and/or profile */
+export async function getAllMedications(
+  activeOnly = false,
+  profileId?: string
+): Promise<Medication[]> {
   const db = await getDatabase();
-  const query = activeOnly
-    ? 'SELECT * FROM medications WHERE is_active = 1 ORDER BY name ASC'
-    : 'SELECT * FROM medications ORDER BY name ASC';
-  const rows = await db.getAllAsync<any>(query);
+  const conditions: string[] = [];
+  const params: any[] = [];
+
+  if (activeOnly) {
+    conditions.push('is_active = 1');
+  }
+  if (profileId) {
+    conditions.push('profile_id = ?');
+    params.push(profileId);
+  }
+
+  const where = conditions.length > 0 ? ` WHERE ${conditions.join(' AND ')}` : '';
+  const rows = await db.getAllAsync<any>(
+    `SELECT * FROM medications${where} ORDER BY name ASC`,
+    ...params
+  );
   return rows.map(mapRowToMedication);
 }
 
@@ -25,19 +40,20 @@ export async function getMedicationById(id: string): Promise<Medication | null> 
 
 /** Create a new medication */
 export async function createMedication(
-  data: Pick<Medication, 'name'> & Partial<Pick<Medication, 'dosage' | 'notes'>>
+  data: Pick<Medication, 'name'> & Partial<Pick<Medication, 'dosage' | 'notes'>> & { profileId?: string }
 ): Promise<Medication> {
   const db = await getDatabase();
   const now = nowISO();
   const id = generateId();
 
   await db.runAsync(
-    `INSERT INTO medications (id, name, dosage, notes, is_active, created_at, updated_at)
-     VALUES (?, ?, ?, ?, 1, ?, ?)`,
+    `INSERT INTO medications (id, name, dosage, notes, profile_id, is_active, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, 1, ?, ?)`,
     id,
     data.name,
     data.dosage ?? null,
     data.notes ?? null,
+    data.profileId ?? null,
     now,
     now
   );
@@ -93,12 +109,23 @@ export async function deleteMedication(id: string): Promise<void> {
   await db.runAsync('DELETE FROM medications WHERE id = ?', id);
 }
 
-/** Search medications by name */
-export async function searchMedications(query: string): Promise<Medication[]> {
+/** Search medications by name, optionally filtered by profile */
+export async function searchMedications(
+  query: string,
+  profileId?: string
+): Promise<Medication[]> {
   const db = await getDatabase();
+  const conditions = ['name LIKE ?'];
+  const params: any[] = [`%${query}%`];
+
+  if (profileId) {
+    conditions.push('profile_id = ?');
+    params.push(profileId);
+  }
+
   const rows = await db.getAllAsync<any>(
-    'SELECT * FROM medications WHERE name LIKE ? ORDER BY name ASC',
-    `%${query}%`
+    `SELECT * FROM medications WHERE ${conditions.join(' AND ')} ORDER BY name ASC`,
+    ...params
   );
   return rows.map(mapRowToMedication);
 }

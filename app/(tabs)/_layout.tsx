@@ -1,9 +1,12 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { Text, StyleSheet } from 'react-native';
-import { colors, typography } from '../../src/theme';
+import { typography, useTheme } from '../../src/theme';
+import { ProfileSwitcher } from '../../src/components';
 
 export default function TabLayout() {
+  const { colors } = useTheme();
+
   return (
     <Tabs
       screenOptions={{
@@ -38,6 +41,7 @@ export default function TabLayout() {
             <Text style={[styles.tabIcon, { color }]}>🏠</Text>
           ),
           tabBarAccessibilityLabel: 'Today tab - view today\'s medication schedule',
+          headerRight: () => <ProfileSwitcher />,
         }}
       />
       <Tabs.Screen
@@ -48,6 +52,7 @@ export default function TabLayout() {
             <Text style={[styles.tabIcon, { color }]}>💊</Text>
           ),
           tabBarAccessibilityLabel: 'Medications tab - manage your medications',
+          headerRight: () => <ProfileSwitcher />,
         }}
       />
       <Tabs.Screen

@@ -1,4 +1,4 @@
-import { colors } from '../../src/theme/colors';
+import { colors, lightColors, darkColors } from '../../src/theme/colors';
 import { typography } from '../../src/theme/typography';
 import { spacing, borderRadius, touchTarget } from '../../src/theme/spacing';
 
@@ -29,6 +29,21 @@ describe('theme', () => {
           hexPattern.test(value) || rgbaPattern.test(value)
         ).toBe(true);
       }
+    });
+
+    it('colors is an alias for lightColors', () => {
+      expect(colors).toBe(lightColors);
+    });
+
+    it('darkColors has the same keys as lightColors', () => {
+      const lightKeys = Object.keys(lightColors).sort();
+      const darkKeys = Object.keys(darkColors).sort();
+      expect(darkKeys).toEqual(lightKeys);
+    });
+
+    it('darkColors has dark surface values', () => {
+      expect(darkColors.surface).toBe('#121212');
+      expect(darkColors.card).toBe('#1E1E1E');
     });
   });
 

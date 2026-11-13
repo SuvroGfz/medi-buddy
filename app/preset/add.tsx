@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -11,8 +11,8 @@ import {
 } from 'react-native';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
-import { format, parse } from 'date-fns';
-import { colors, typography, spacing, borderRadius, touchTarget } from '../../src/theme';
+import { format } from 'date-fns';
+import { typography, spacing, borderRadius, touchTarget, useTheme, ThemeColors } from '../../src/theme';
 import { usePresetStore } from '../../src/stores/usePresetStore';
 import { Button, LoadingOverlay } from '../../src/components';
 import { formatTime } from '../../src/utils/time';
@@ -20,6 +20,9 @@ import { formatTime } from '../../src/utils/time';
 const ICONS = ['🌅', '🌞', '☀️', '🌤️', '🌆', '🌙', '😴', '💊', '🍳', '🥗', '🍽️', '⏰'];
 
 export default function AddPresetScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+
   const { addPreset } = usePresetStore();
   const [name, setName] = useState('');
   const [time, setTime] = useState(new Date());
@@ -119,71 +122,72 @@ export default function AddPresetScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-  content: {
-    padding: spacing.lg,
-  },
-  field: {
-    marginBottom: spacing.xl,
-  },
-  label: {
-    ...typography.bodySmall,
-    color: colors.textPrimary,
-    fontWeight: '600',
-    marginBottom: spacing.sm,
-  },
-  input: {
-    backgroundColor: colors.card,
-    borderRadius: borderRadius.md,
-    padding: spacing.lg,
-    ...typography.body,
-    color: colors.textPrimary,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  timeBtn: {
-    backgroundColor: colors.card,
-    borderRadius: borderRadius.md,
-    padding: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    minHeight: touchTarget.min,
-    justifyContent: 'center',
-  },
-  timeText: {
-    ...typography.h2,
-    color: colors.primary,
-    textAlign: 'center',
-  },
-  iconGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  iconBtn: {
-    width: 48,
-    height: 48,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  iconBtnActive: {
-    backgroundColor: colors.surface,
-    borderColor: colors.primary,
-    borderWidth: 2,
-  },
-  iconText: {
-    fontSize: 24,
-  },
-  actions: {
-    gap: spacing.md,
-    marginTop: spacing.lg,
-  },
-});
+const makeStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.surface,
+    },
+    content: {
+      padding: spacing.lg,
+    },
+    field: {
+      marginBottom: spacing.xl,
+    },
+    label: {
+      ...typography.bodySmall,
+      color: colors.textPrimary,
+      fontWeight: '600',
+      marginBottom: spacing.sm,
+    },
+    input: {
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.md,
+      padding: spacing.lg,
+      ...typography.body,
+      color: colors.textPrimary,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    timeBtn: {
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.md,
+      padding: spacing.lg,
+      borderWidth: 1,
+      borderColor: colors.border,
+      minHeight: touchTarget.min,
+      justifyContent: 'center',
+    },
+    timeText: {
+      ...typography.h2,
+      color: colors.primary,
+      textAlign: 'center',
+    },
+    iconGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+    },
+    iconBtn: {
+      width: 48,
+      height: 48,
+      borderRadius: borderRadius.md,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    iconBtnActive: {
+      backgroundColor: colors.surface,
+      borderColor: colors.primary,
+      borderWidth: 2,
+    },
+    iconText: {
+      fontSize: 24,
+    },
+    actions: {
+      gap: spacing.md,
+      marginTop: spacing.lg,
+    },
+  });

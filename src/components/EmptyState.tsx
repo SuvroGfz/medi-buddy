@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
-import { colors, typography, spacing } from '../theme';
+import React, { useMemo } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { typography, spacing, useTheme, ThemeColors } from '../theme';
 
 interface EmptyStateProps {
   icon?: string;
@@ -10,6 +10,9 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({ icon, title, subtitle, children }: EmptyStateProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+
   return (
     <View style={styles.container} accessibilityRole="text">
       {icon && <Text style={styles.icon}>{icon}</Text>}
@@ -20,30 +23,31 @@ export function EmptyState({ icon, title, subtitle, children }: EmptyStateProps)
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.xxxl,
-  },
-  icon: {
-    fontSize: 64,
-    marginBottom: spacing.lg,
-  },
-  title: {
-    ...typography.h2,
-    color: colors.textPrimary,
-    textAlign: 'center',
-    marginBottom: spacing.sm,
-  },
-  subtitle: {
-    ...typography.body,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: spacing.xl,
-  },
-  action: {
-    marginTop: spacing.lg,
-  },
-});
+const makeStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: spacing.xxxl,
+    },
+    icon: {
+      fontSize: 64,
+      marginBottom: spacing.lg,
+    },
+    title: {
+      ...typography.h2,
+      color: colors.textPrimary,
+      textAlign: 'center',
+      marginBottom: spacing.sm,
+    },
+    subtitle: {
+      ...typography.body,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      marginBottom: spacing.xl,
+    },
+    action: {
+      marginTop: spacing.lg,
+    },
+  });

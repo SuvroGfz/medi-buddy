@@ -1,13 +1,12 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   TouchableOpacity,
   Text,
   StyleSheet,
   ViewStyle,
-  TextStyle,
   ActivityIndicator,
 } from 'react-native';
-import { colors, typography, spacing, borderRadius, touchTarget } from '../theme';
+import { typography, spacing, borderRadius, touchTarget, useTheme, ThemeColors } from '../theme';
 
 interface ButtonProps {
   title: string;
@@ -32,6 +31,9 @@ export function Button({
   style,
   accessibilityLabel,
 }: ButtonProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+
   const buttonStyles = [
     styles.base,
     styles[variant],
@@ -72,72 +74,73 @@ export function Button({
   );
 }
 
-const styles = StyleSheet.create({
-  base: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: borderRadius.md,
-    minHeight: touchTarget.min,
-  },
-  primary: {
-    backgroundColor: colors.primary,
-  },
-  secondary: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.primary,
-  },
-  danger: {
-    backgroundColor: colors.dangerLight,
-  },
-  ghost: {
-    backgroundColor: 'transparent',
-  },
-  disabled: {
-    backgroundColor: colors.disabled,
-    borderColor: colors.disabled,
-  },
-  size_sm: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    minHeight: 36,
-  },
-  size_md: {
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.md,
-  },
-  size_lg: {
-    paddingHorizontal: spacing.xxl,
-    paddingVertical: spacing.lg,
-  },
-  text: {
-    ...typography.button,
-  },
-  text_primary: {
-    color: colors.textOnPrimary,
-  },
-  text_secondary: {
-    color: colors.primary,
-  },
-  text_danger: {
-    color: colors.danger,
-  },
-  text_ghost: {
-    color: colors.primary,
-  },
-  textSize_sm: {
-    fontSize: 14,
-  },
-  textSize_md: {},
-  textSize_lg: {
-    fontSize: 18,
-  },
-  textDisabled: {
-    color: colors.disabledText,
-  },
-  icon: {
-    fontSize: 18,
-    marginRight: spacing.sm,
-  },
-});
+const makeStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    base: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: borderRadius.md,
+      minHeight: touchTarget.min,
+    },
+    primary: {
+      backgroundColor: colors.primary,
+    },
+    secondary: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.primary,
+    },
+    danger: {
+      backgroundColor: colors.dangerLight,
+    },
+    ghost: {
+      backgroundColor: 'transparent',
+    },
+    disabled: {
+      backgroundColor: colors.disabled,
+      borderColor: colors.disabled,
+    },
+    size_sm: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      minHeight: 36,
+    },
+    size_md: {
+      paddingHorizontal: spacing.xl,
+      paddingVertical: spacing.md,
+    },
+    size_lg: {
+      paddingHorizontal: spacing.xxl,
+      paddingVertical: spacing.lg,
+    },
+    text: {
+      ...typography.button,
+    },
+    text_primary: {
+      color: colors.textOnPrimary,
+    },
+    text_secondary: {
+      color: colors.primary,
+    },
+    text_danger: {
+      color: colors.danger,
+    },
+    text_ghost: {
+      color: colors.primary,
+    },
+    textSize_sm: {
+      fontSize: 14,
+    },
+    textSize_md: {},
+    textSize_lg: {
+      fontSize: 18,
+    },
+    textDisabled: {
+      color: colors.disabledText,
+    },
+    icon: {
+      fontSize: 18,
+      marginRight: spacing.sm,
+    },
+  });

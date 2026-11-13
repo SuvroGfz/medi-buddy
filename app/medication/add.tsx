@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -10,16 +10,30 @@ import {
   Platform,
 } from 'react-native';
 import { router } from 'expo-router';
-import { colors, typography, spacing, borderRadius } from '../../src/theme';
+import { typography, spacing, borderRadius, useTheme, ThemeColors } from '../../src/theme';
 import { useMedicationStore } from '../../src/stores/useMedicationStore';
-import { Button, LoadingOverlay } from '../../src/components';
+import { Button, LoadingOverlay, MedicationAutocomplete } from '../../src/components';
+import { MedicationEntry } from '../../src/db/medicationLookup';
 
 export default function AddMedicationScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+
   const { addMedication } = useMedicationStore();
   const [name, setName] = useState('');
   const [dosage, setDosage] = useState('');
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
+
+  const handleSelectMedication = (entry: MedicationEntry) => {
+    // Auto-fill dosage and notes from database
+    if (entry.strength && !dosage) {
+      setDosage(entry.strength);
+    }
+    if (entry.genericName && !notes) {
+      setNotes(`${entry.genericName} • ${entry.type} • ${entry.manufacturer}`);
+    }
+  };
 
   const handleSave = async () => {
     if (!name.trim()) {
@@ -52,15 +66,16 @@ export default function AddMedicationScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.field}>
           <Text style={styles.label}>Medication Name *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="e.g., Metformin"
-            placeholderTextColor={colors.textSecondary}
+          <MedicationAutocomplete
             value={name}
             onChangeText={setName}
-            autoFocus
-            accessibilityLabel="Medication name"
+            onSelectMedication={handleSelectMedication}
+            placeholder="e.g., Napa, Metformin"
+            testID="medication-name"
           />
+          <Text style={styles.hint}>
+            💊 Search BD medications database or type a custom name
+          </Text>
         </View>
 
         <View style={styles.field}>
@@ -109,37 +124,43 @@ export default function AddMedicationScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-  content: {
-    padding: spacing.lg,
-  },
-  field: {
-    marginBottom: spacing.xl,
-  },
-  label: {
-    ...typography.bodySmall,
-    color: colors.textPrimary,
-    fontWeight: '600',
-    marginBottom: spacing.sm,
-  },
-  input: {
-    backgroundColor: colors.card,
-    borderRadius: borderRadius.md,
-    padding: spacing.lg,
-    ...typography.body,
-    color: colors.textPrimary,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  textarea: {
-    minHeight: 80,
-  },
-  actions: {
-    gap: spacing.md,
-    marginTop: spacing.lg,
-  },
-});
+const makeStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.surface,
+    },
+    content: {
+      padding: spacing.lg,
+    },
+    field: {
+      marginBottom: spacing.xl,
+    },
+    label: {
+      ...typography.bodySmall,
+      color: colors.textPrimary,
+      fontWeight: '600',
+      marginBottom: spacing.sm,
+    },
+    hint: {
+      ...typography.caption,
+      color: colors.textSecondary,
+      marginTop: spacing.xs,
+    },
+    input: {
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.md,
+      padding: spacing.lg,
+      ...typography.body,
+      color: colors.textPrimary,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    textarea: {
+      minHeight: 80,
+    },
+    actions: {
+      gap: spacing.md,
+      marginTop: spacing.lg,
+    },
+  });

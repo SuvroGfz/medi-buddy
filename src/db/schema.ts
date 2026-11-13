@@ -1,8 +1,17 @@
 /** SQLite schema definitions and migrations for MediBuddy */
 
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 export const CREATE_TABLES = `
+CREATE TABLE IF NOT EXISTS profiles (
+  id          TEXT PRIMARY KEY,
+  name        TEXT NOT NULL,
+  age         INTEGER NOT NULL,
+  avatar_emoji TEXT NOT NULL DEFAULT '👤',
+  is_default  INTEGER NOT NULL DEFAULT 0,
+  created_at  TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS time_presets (
   id          TEXT PRIMARY KEY,
   name        TEXT NOT NULL UNIQUE,
@@ -18,6 +27,7 @@ CREATE TABLE IF NOT EXISTS medications (
   name        TEXT NOT NULL,
   dosage      TEXT,
   notes       TEXT,
+  profile_id  TEXT REFERENCES profiles(id),
   is_active   INTEGER DEFAULT 1,
   created_at  TEXT NOT NULL,
   updated_at  TEXT NOT NULL

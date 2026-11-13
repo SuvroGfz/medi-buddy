@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -9,13 +9,16 @@ import {
   Alert,
 } from 'react-native';
 import { useFocusEffect, router } from 'expo-router';
-import { colors, typography, spacing, borderRadius, touchTarget } from '../../src/theme';
+import { typography, spacing, borderRadius, touchTarget, useTheme, ThemeColors } from '../../src/theme';
 import { useMedicationStore } from '../../src/stores/useMedicationStore';
 import { useScheduleStore } from '../../src/stores/useScheduleStore';
 import { MedicationCard, EmptyState } from '../../src/components';
 import { Medication } from '../../src/types';
 
 export default function MedicationsScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+
   const { medications, loading, loadMedications, editMedication, removeMedication, searchMedications } =
     useMedicationStore();
   const { getSchedulesForMedication } = useScheduleStore();
@@ -125,46 +128,47 @@ export default function MedicationsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-  searchContainer: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-  },
-  searchInput: {
-    backgroundColor: colors.card,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    ...typography.body,
-    color: colors.textPrimary,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  list: {
-    paddingBottom: 100,
-  },
-  fab: {
-    position: 'absolute',
-    bottom: 24,
-    right: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-  },
-  fabText: {
-    fontSize: 28,
-    color: colors.textOnPrimary,
-    lineHeight: 30,
-  },
-});
+const makeStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.surface,
+    },
+    searchContainer: {
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.md,
+    },
+    searchInput: {
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.md,
+      padding: spacing.md,
+      ...typography.body,
+      color: colors.textPrimary,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    list: {
+      paddingBottom: 100,
+    },
+    fab: {
+      position: 'absolute',
+      bottom: 24,
+      right: 24,
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: colors.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      elevation: 6,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.2,
+      shadowRadius: 6,
+    },
+    fabText: {
+      fontSize: 28,
+      color: colors.textOnPrimary,
+      lineHeight: 30,
+    },
+  });

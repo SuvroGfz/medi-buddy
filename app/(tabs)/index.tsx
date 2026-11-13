@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -7,14 +7,18 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useFocusEffect, router } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { format } from 'date-fns';
-import { colors, typography, spacing, borderRadius } from '../../src/theme';
+import { typography, spacing, borderRadius, useTheme, ThemeColors } from '../../src/theme';
 import { useScheduleStore } from '../../src/stores/useScheduleStore';
 import { TimelineItem, EmptyState, Button } from '../../src/components';
 import { formatTime, isTodayScheduled } from '../../src/utils/time';
-import { getUserProfile } from '../../src/services/userProfile';
+import { getProfile } from '../../src/db/profiles';
 
 export default function TodayScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+
   const {
     timeGroups,
     intakeLogs,
@@ -33,7 +37,14 @@ export default function TodayScreen() {
   useFocusEffect(
     useCallback(() => {
       refresh();
-      getUserProfile().then((p) => setUserName(p?.name ?? null));
+      AsyncStorage.getItem('@medibuddy_active_profile_id').then(async (profileId) => {
+        if (profileId) {
+          const profile = await getProfile(profileId);
+          setUserName(profile?.name ?? null);
+        } else {
+          setUserName(null);
+        }
+      });
     }, [refresh])
   );
 
@@ -148,56 +159,57 @@ export default function TodayScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-  dateHeader: {
-    backgroundColor: colors.primaryDark,
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.lg,
-    paddingTop: spacing.sm,
-  },
-  greeting: {
-    ...typography.h1,
-    color: colors.textOnPrimary,
-  },
-  date: {
-    ...typography.body,
-    color: colors.primaryLight,
-    marginTop: spacing.xs,
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: spacing.lg,
-    paddingBottom: 100,
-  },
-  group: {
-    marginBottom: spacing.xl,
-  },
-  groupHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.md,
-  },
-  groupIcon: {
-    fontSize: 28,
-    marginRight: spacing.md,
-  },
-  groupLabel: {
-    ...typography.body,
-    color: colors.textPrimary,
-    fontWeight: '700',
-  },
-  groupTime: {
-    ...typography.caption,
-    color: colors.primary,
-    fontWeight: '600',
-  },
-  groupItems: {
-    marginLeft: spacing.xs,
-  },
-});
+const makeStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.surface,
+    },
+    dateHeader: {
+      backgroundColor: colors.primaryDark,
+      paddingHorizontal: spacing.lg,
+      paddingBottom: spacing.lg,
+      paddingTop: spacing.sm,
+    },
+    greeting: {
+      ...typography.h1,
+      color: colors.textOnPrimary,
+    },
+    date: {
+      ...typography.body,
+      color: colors.primaryLight,
+      marginTop: spacing.xs,
+    },
+    scroll: {
+      flex: 1,
+    },
+    scrollContent: {
+      padding: spacing.lg,
+      paddingBottom: 100,
+    },
+    group: {
+      marginBottom: spacing.xl,
+    },
+    groupHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: spacing.md,
+    },
+    groupIcon: {
+      fontSize: 28,
+      marginRight: spacing.md,
+    },
+    groupLabel: {
+      ...typography.body,
+      color: colors.textPrimary,
+      fontWeight: '700',
+    },
+    groupTime: {
+      ...typography.caption,
+      color: colors.primary,
+      fontWeight: '600',
+    },
+    groupItems: {
+      marginLeft: spacing.xs,
+    },
+  });

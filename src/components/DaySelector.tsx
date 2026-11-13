@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors, typography, spacing, borderRadius, touchTarget } from '../theme';
+import { typography, spacing, borderRadius, touchTarget, useTheme, ThemeColors } from '../theme';
 import { DAY_LABELS } from '../types';
 
 interface DaySelectorProps {
@@ -9,6 +9,9 @@ interface DaySelectorProps {
 }
 
 export function DaySelector({ selectedDays, onChange }: DaySelectorProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+
   const selected = new Set(selectedDays.split(',').filter(Boolean));
 
   const toggleDay = (day: string) => {
@@ -52,33 +55,34 @@ export function DaySelector({ selectedDays, onChange }: DaySelectorProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    gap: spacing.xs,
-    flexWrap: 'wrap',
-  },
-  pill: {
-    minWidth: touchTarget.min,
-    height: 36,
-    borderRadius: borderRadius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.md,
-    backgroundColor: colors.divider,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  pillSelected: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  label: {
-    ...typography.caption,
-    color: colors.textSecondary,
-    fontWeight: '600',
-  },
-  labelSelected: {
-    color: colors.textOnPrimary,
-  },
-});
+const makeStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      gap: spacing.xs,
+      flexWrap: 'wrap',
+    },
+    pill: {
+      minWidth: touchTarget.min,
+      height: 36,
+      borderRadius: borderRadius.full,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: spacing.md,
+      backgroundColor: colors.divider,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    pillSelected: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
+    label: {
+      ...typography.caption,
+      color: colors.textSecondary,
+      fontWeight: '600',
+    },
+    labelSelected: {
+      color: colors.textOnPrimary,
+    },
+  });

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {
+    "@expo/ui": "~58.0.28",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/datetimepicker": "9.2.1",
     "@testing-library/react-native": "^14.1.0",
@@ -14,11 +15,14 @@
     "expo-device": "~58.0.5",
     "expo-linking": "~58.0.16",
     "expo-notifications": "~58.1.8",
+    "expo-print": "~58.0.9",
     "expo-router": "~58.0.30",
+    "expo-sharing": "~58.0.23",
     "expo-splash-screen": "~58.0.14",
     "expo-sqlite": "~58.0.15",
     "expo-status-bar": "~58.0.4",
     "expo-system-ui": "~58.0.7",
+    "expo-widgets": "~58.0.28",
     "jest-expo": "~58.0.14",
     "react": "19.3.0",
     "react-dom": "19.3.0",
@@ -32,6 +36,8 @@
   },
   "devDependencies": {
     "@types/react": "~19.3.0",
+    "eslint": "^9.0.0",
+    "eslint-config-expo": "~58.0.4",
     "typescript": "~6.0.3"
   },
   "scripts": {
@@ -41,7 +47,8 @@
     "web": "expo start --web",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "lint": "expo lint"
   },
   "private": true,
   "jest": {

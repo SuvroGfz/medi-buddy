@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { colors, typography, spacing, borderRadius } from '../theme';
+import { typography, spacing, borderRadius, useTheme, ThemeColors } from '../theme';
 import { TimePreset } from '../types';
 import { formatTime } from '../utils/time';
 
@@ -12,6 +12,9 @@ interface PresetChipProps {
 }
 
 export function PresetChip({ preset, linkedCount, onPress, selected }: PresetChipProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+
   return (
     <TouchableOpacity
       style={[styles.chip, selected && styles.chipSelected]}
@@ -39,56 +42,57 @@ export function PresetChip({ preset, linkedCount, onPress, selected }: PresetChi
   );
 }
 
-const styles = StyleSheet.create({
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.card,
-    borderRadius: borderRadius.lg,
-    padding: spacing.md,
-    marginVertical: spacing.xs,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  chipSelected: {
-    backgroundColor: colors.surface,
-    borderColor: colors.primary,
-    borderWidth: 2,
-  },
-  icon: {
-    fontSize: 24,
-    marginRight: spacing.md,
-  },
-  content: {
-    flex: 1,
-  },
-  name: {
-    ...typography.bodySmall,
-    color: colors.textPrimary,
-    fontWeight: '600',
-  },
-  nameSelected: {
-    color: colors.primary,
-  },
-  time: {
-    ...typography.caption,
-    color: colors.textSecondary,
-  },
-  timeSelected: {
-    color: colors.primary,
-  },
-  badge: {
-    backgroundColor: colors.primary,
-    borderRadius: borderRadius.full,
-    minWidth: 24,
-    height: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.sm,
-  },
-  badgeText: {
-    ...typography.caption,
-    color: colors.textOnPrimary,
-    fontWeight: '700',
-  },
-});
+const makeStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    chip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.lg,
+      padding: spacing.md,
+      marginVertical: spacing.xs,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    chipSelected: {
+      backgroundColor: colors.surface,
+      borderColor: colors.primary,
+      borderWidth: 2,
+    },
+    icon: {
+      fontSize: 24,
+      marginRight: spacing.md,
+    },
+    content: {
+      flex: 1,
+    },
+    name: {
+      ...typography.bodySmall,
+      color: colors.textPrimary,
+      fontWeight: '600',
+    },
+    nameSelected: {
+      color: colors.primary,
+    },
+    time: {
+      ...typography.caption,
+      color: colors.textSecondary,
+    },
+    timeSelected: {
+      color: colors.primary,
+    },
+    badge: {
+      backgroundColor: colors.primary,
+      borderRadius: borderRadius.full,
+      minWidth: 24,
+      height: 24,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: spacing.sm,
+    },
+    badgeText: {
+      ...typography.caption,
+      color: colors.textOnPrimary,
+      fontWeight: '700',
+    },
+  });

@@ -5,6 +5,7 @@ const USER_PROFILE_KEY = '@medibuddy_user_profile';
 export interface UserProfile {
   name: string;
   age: number;
+  homeTimezone?: string;
 }
 
 /** Get the saved user profile, or null if onboarding hasn't been completed */

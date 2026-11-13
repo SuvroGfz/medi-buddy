@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, router, useFocusEffect } from 'expo-router';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import { colors, typography, spacing, borderRadius, touchTarget } from '../../src/theme';
+import { typography, spacing, borderRadius, touchTarget, useTheme, ThemeColors } from '../../src/theme';
 import { useMedicationStore } from '../../src/stores/useMedicationStore';
 import { usePresetStore } from '../../src/stores/usePresetStore';
 import { useScheduleStore } from '../../src/stores/useScheduleStore';
@@ -23,6 +23,9 @@ import { formatTime } from '../../src/utils/time';
 import { format } from 'date-fns';
 
 export default function MedicationDetailScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+
   const { id } = useLocalSearchParams<{ id: string }>();
   const { medications, editMedication, removeMedication } = useMedicationStore();
   const { presets, loadPresets } = usePresetStore();
@@ -401,174 +404,175 @@ export default function MedicationDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-  content: {
-    padding: spacing.lg,
-    paddingBottom: 40,
-  },
-  notFound: {
-    ...typography.body,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginTop: 100,
-  },
-  section: {
-    marginBottom: spacing.xxl,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.md,
-  },
-  sectionTitle: {
-    ...typography.h2,
-    color: colors.textPrimary,
-  },
-  sectionSubtitle: {
-    ...typography.bodySmall,
-    color: colors.textSecondary,
-    marginBottom: spacing.md,
-  },
-  editLink: {
-    ...typography.button,
-    color: colors.primary,
-  },
-  field: {
-    marginBottom: spacing.lg,
-  },
-  label: {
-    ...typography.bodySmall,
-    color: colors.textPrimary,
-    fontWeight: '600',
-    marginBottom: spacing.sm,
-  },
-  input: {
-    backgroundColor: colors.card,
-    borderRadius: borderRadius.md,
-    padding: spacing.lg,
-    ...typography.body,
-    color: colors.textPrimary,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  textarea: {
-    minHeight: 80,
-  },
-  editActions: {
-    flexDirection: 'row',
-    gap: spacing.md,
-  },
-  infoCard: {
-    backgroundColor: colors.card,
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
-  },
-  medName: {
-    ...typography.h2,
-    color: colors.textPrimary,
-  },
-  medDosage: {
-    ...typography.body,
-    color: colors.primary,
-    marginTop: spacing.xs,
-  },
-  medNotes: {
-    ...typography.bodySmall,
-    color: colors.textSecondary,
-    marginTop: spacing.sm,
-    fontStyle: 'italic',
-  },
-  scheduleItem: {
-    backgroundColor: colors.card,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  scheduleLabel: {
-    ...typography.bodySmall,
-    color: colors.textPrimary,
-    flex: 1,
-  },
-  scheduleDays: {
-    ...typography.caption,
-    color: colors.textSecondary,
-    marginRight: spacing.sm,
-  },
-  removeBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: colors.dangerLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  removeBtnText: {
-    color: colors.danger,
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  // Modal styles
-  modalContainer: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: spacing.lg,
-    backgroundColor: colors.primaryDark,
-  },
-  modalTitle: {
-    ...typography.h2,
-    color: colors.textOnPrimary,
-  },
-  modalClose: {
-    fontSize: 22,
-    color: colors.textOnPrimary,
-    padding: spacing.sm,
-  },
-  modalContent: {
-    padding: spacing.lg,
-    paddingBottom: 40,
-  },
-  modalSectionTitle: {
-    ...typography.body,
-    color: colors.textPrimary,
-    fontWeight: '700',
-    marginBottom: spacing.md,
-  },
-  customTimeBtn: {
-    backgroundColor: colors.card,
-    borderRadius: borderRadius.md,
-    padding: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    minHeight: touchTarget.min,
-    justifyContent: 'center',
-  },
-  customTimeBtnActive: {
-    borderColor: colors.primary,
-    borderWidth: 2,
-    backgroundColor: colors.surface,
-  },
-  customTimeBtnText: {
-    ...typography.body,
-    color: colors.textSecondary,
-  },
-  customTimeBtnTextActive: {
-    color: colors.primary,
-    fontWeight: '600',
-  },
-  modalActions: {
-    gap: spacing.md,
-    marginTop: spacing.xxl,
-  },
-});
+const makeStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.surface,
+    },
+    content: {
+      padding: spacing.lg,
+      paddingBottom: 40,
+    },
+    notFound: {
+      ...typography.body,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      marginTop: 100,
+    },
+    section: {
+      marginBottom: spacing.xxl,
+    },
+    sectionHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: spacing.md,
+    },
+    sectionTitle: {
+      ...typography.h2,
+      color: colors.textPrimary,
+    },
+    sectionSubtitle: {
+      ...typography.bodySmall,
+      color: colors.textSecondary,
+      marginBottom: spacing.md,
+    },
+    editLink: {
+      ...typography.button,
+      color: colors.primary,
+    },
+    field: {
+      marginBottom: spacing.lg,
+    },
+    label: {
+      ...typography.bodySmall,
+      color: colors.textPrimary,
+      fontWeight: '600',
+      marginBottom: spacing.sm,
+    },
+    input: {
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.md,
+      padding: spacing.lg,
+      ...typography.body,
+      color: colors.textPrimary,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    textarea: {
+      minHeight: 80,
+    },
+    editActions: {
+      flexDirection: 'row',
+      gap: spacing.md,
+    },
+    infoCard: {
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.lg,
+      padding: spacing.lg,
+    },
+    medName: {
+      ...typography.h2,
+      color: colors.textPrimary,
+    },
+    medDosage: {
+      ...typography.body,
+      color: colors.primary,
+      marginTop: spacing.xs,
+    },
+    medNotes: {
+      ...typography.bodySmall,
+      color: colors.textSecondary,
+      marginTop: spacing.sm,
+      fontStyle: 'italic',
+    },
+    scheduleItem: {
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.md,
+      padding: spacing.md,
+      marginBottom: spacing.sm,
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    scheduleLabel: {
+      ...typography.bodySmall,
+      color: colors.textPrimary,
+      flex: 1,
+    },
+    scheduleDays: {
+      ...typography.caption,
+      color: colors.textSecondary,
+      marginRight: spacing.sm,
+    },
+    removeBtn: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: colors.dangerLight,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    removeBtnText: {
+      color: colors.danger,
+      fontSize: 14,
+      fontWeight: '700',
+    },
+    // Modal styles
+    modalContainer: {
+      flex: 1,
+      backgroundColor: colors.surface,
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: spacing.lg,
+      backgroundColor: colors.primaryDark,
+    },
+    modalTitle: {
+      ...typography.h2,
+      color: colors.textOnPrimary,
+    },
+    modalClose: {
+      fontSize: 22,
+      color: colors.textOnPrimary,
+      padding: spacing.sm,
+    },
+    modalContent: {
+      padding: spacing.lg,
+      paddingBottom: 40,
+    },
+    modalSectionTitle: {
+      ...typography.body,
+      color: colors.textPrimary,
+      fontWeight: '700',
+      marginBottom: spacing.md,
+    },
+    customTimeBtn: {
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.md,
+      padding: spacing.lg,
+      borderWidth: 1,
+      borderColor: colors.border,
+      minHeight: touchTarget.min,
+      justifyContent: 'center',
+    },
+    customTimeBtnActive: {
+      borderColor: colors.primary,
+      borderWidth: 2,
+      backgroundColor: colors.surface,
+    },
+    customTimeBtnText: {
+      ...typography.body,
+      color: colors.textSecondary,
+    },
+    customTimeBtnTextActive: {
+      color: colors.primary,
+      fontWeight: '600',
+    },
+    modalActions: {
+      gap: spacing.md,
+      marginTop: spacing.xxl,
+    },
+  });

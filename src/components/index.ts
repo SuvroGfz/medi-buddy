@@ -5,3 +5,5 @@ export { PresetChip } from './PresetChip';
 export { TimelineItem } from './TimelineItem';
 export { DaySelector } from './DaySelector';
 export { LoadingOverlay } from './LoadingOverlay';
+export { MedicationAutocomplete } from './MedicationAutocomplete';
+export { ProfileSwitcher } from './ProfileSwitcher';

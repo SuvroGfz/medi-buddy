@@ -11,21 +11,25 @@ let currentSound: any = null;
 /**
  * Lazily load the expo-av Audio API at call time.
  *
- * We need to avoid two failure modes:
- * 1. Metro statically resolves `require('expo-av')` at bundle time, which
- *    triggers the ExponentAV native module check and crashes in Expo Go.
- * 2. Jest doesn't support dynamic `import()` without --experimental-vm-modules.
+ * expo-av's ExponentAV.js calls requireNativeModule('ExponentAV') at the
+ * MODULE TOP LEVEL. In Expo Go (SDK 53+) this native module is absent, so
+ * the mere act of importing expo-av crashes the app.
  *
- * Solution: use an indirect require via a computed module name. Metro's static
- * analysis only follows literal string arguments to require(), so it does not
- * bundle expo-av eagerly. At runtime the require executes inside a try-catch,
- * so a missing native module is caught gracefully. In Jest the module is mocked
- * and require() resolves to the mock.
+ * Strategy: First check if the ExponentAV native module is available using
+ * requireOptionalNativeModule (which returns null instead of throwing).
+ * Only if it exists do we load expo-av via a computed require. The try-catch
+ * handles any remaining edge cases.
  */
 function getAudioAPI(): any | null {
   try {
-    // Indirect require — Metro cannot statically analyze this,
-    // so it won't try to resolve the module at bundle time.
+    // Check if native module is available (does NOT throw).
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const core = require('expo-modules-core');
+    const nativeMod = core.requireOptionalNativeModule('ExponentAV');
+    if (!nativeMod) return null; // Not available (Expo Go)
+
+    // Safe to require expo-av — the native module is present.
+    // Computed name prevents Metro from eagerly bundling expo-av.
     const moduleName = ['expo', 'av'].join('-');
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const mod = require(moduleName);

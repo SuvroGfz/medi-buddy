@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -11,8 +11,8 @@ import {
 } from 'react-native';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, router, useFocusEffect } from 'expo-router';
-import { format, parse } from 'date-fns';
-import { colors, typography, spacing, borderRadius, touchTarget } from '../../src/theme';
+import { format } from 'date-fns';
+import { typography, spacing, borderRadius, touchTarget, useTheme, ThemeColors } from '../../src/theme';
 import { usePresetStore } from '../../src/stores/usePresetStore';
 import { Button, LoadingOverlay } from '../../src/components';
 import { formatTime } from '../../src/utils/time';
@@ -21,6 +21,9 @@ import { countMedicationsForPreset } from '../../src/db/presets';
 const ICONS = ['🌅', '🌞', '☀️', '🌤️', '🌆', '🌙', '😴', '💊', '🍳', '🥗', '🍽️', '⏰'];
 
 export default function EditPresetScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+
   const { id } = useLocalSearchParams<{ id: string }>();
   const { presets, editPreset, removePreset } = usePresetStore();
   const preset = presets.find((p) => p.id === id);
@@ -200,87 +203,88 @@ export default function EditPresetScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-  content: {
-    padding: spacing.lg,
-  },
-  notFound: {
-    ...typography.body,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginTop: 100,
-  },
-  field: {
-    marginBottom: spacing.xl,
-  },
-  label: {
-    ...typography.bodySmall,
-    color: colors.textPrimary,
-    fontWeight: '600',
-    marginBottom: spacing.sm,
-  },
-  input: {
-    backgroundColor: colors.card,
-    borderRadius: borderRadius.md,
-    padding: spacing.lg,
-    ...typography.body,
-    color: colors.textPrimary,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  timeBtn: {
-    backgroundColor: colors.card,
-    borderRadius: borderRadius.md,
-    padding: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    minHeight: touchTarget.min,
-    justifyContent: 'center',
-  },
-  timeText: {
-    ...typography.h2,
-    color: colors.primary,
-    textAlign: 'center',
-  },
-  preview: {
-    backgroundColor: colors.warningLight,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    marginBottom: spacing.xl,
-  },
-  previewText: {
-    ...typography.bodySmall,
-    color: colors.textPrimary,
-  },
-  iconGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  iconBtn: {
-    width: 48,
-    height: 48,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  iconBtnActive: {
-    backgroundColor: colors.surface,
-    borderColor: colors.primary,
-    borderWidth: 2,
-  },
-  iconText: {
-    fontSize: 24,
-  },
-  actions: {
-    gap: spacing.md,
-    marginTop: spacing.lg,
-  },
-});
+const makeStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.surface,
+    },
+    content: {
+      padding: spacing.lg,
+    },
+    notFound: {
+      ...typography.body,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      marginTop: 100,
+    },
+    field: {
+      marginBottom: spacing.xl,
+    },
+    label: {
+      ...typography.bodySmall,
+      color: colors.textPrimary,
+      fontWeight: '600',
+      marginBottom: spacing.sm,
+    },
+    input: {
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.md,
+      padding: spacing.lg,
+      ...typography.body,
+      color: colors.textPrimary,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    timeBtn: {
+      backgroundColor: colors.card,
+      borderRadius: borderRadius.md,
+      padding: spacing.lg,
+      borderWidth: 1,
+      borderColor: colors.border,
+      minHeight: touchTarget.min,
+      justifyContent: 'center',
+    },
+    timeText: {
+      ...typography.h2,
+      color: colors.primary,
+      textAlign: 'center',
+    },
+    preview: {
+      backgroundColor: colors.warningLight,
+      borderRadius: borderRadius.md,
+      padding: spacing.md,
+      marginBottom: spacing.xl,
+    },
+    previewText: {
+      ...typography.bodySmall,
+      color: colors.textPrimary,
+    },
+    iconGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+    },
+    iconBtn: {
+      width: 48,
+      height: 48,
+      borderRadius: borderRadius.md,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    iconBtnActive: {
+      backgroundColor: colors.surface,
+      borderColor: colors.primary,
+      borderWidth: 2,
+    },
+    iconText: {
+      fontSize: 24,
+    },
+    actions: {
+      gap: spacing.md,
+      marginTop: spacing.lg,
+    },
+  });

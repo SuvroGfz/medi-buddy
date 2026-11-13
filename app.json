@@ -26,6 +26,22 @@
           "imageWidth": 200,
           "resizeMode": "contain"
         }
+      ],
+      "expo-sharing",
+      [
+        "expo-widgets",
+        {
+          "widgets": [
+            {
+              "name": "NextDoseWidget",
+              "displayName": "Next Dose",
+              "description": "See your next medication dose at a glance",
+              "ios": {
+                "supportedFamilies": ["systemSmall", "systemMedium"]
+              }
+            }
+          ]
+        }
       ]
     ],
     "splash": {

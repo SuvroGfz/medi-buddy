@@ -5,7 +5,7 @@ import { View, StyleSheet } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as SplashScreen from 'expo-splash-screen';
 import { router } from 'expo-router';
-import { colors } from '../src/theme';
+import { ThemeProvider, useTheme } from '../src/theme';
 import { setupNotifications } from '../src/services/notifications';
 import { getDatabase } from '../src/db/migrations';
 import { isOnboardingComplete } from '../src/services/userProfile';
@@ -23,9 +23,10 @@ Notifications.setNotificationHandler({
   }),
 });
 
-export default function RootLayout() {
+function RootLayoutInner() {
   const [appReady, setAppReady] = useState(false);
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
+  const { colors, statusBarStyle } = useTheme();
 
   useEffect(() => {
     async function init() {
@@ -106,8 +107,8 @@ export default function RootLayout() {
   }
 
   return (
-    <View style={styles.container} onLayout={onLayoutReady}>
-      <StatusBar style="light" />
+    <View style={[styles.container, { backgroundColor: colors.surface }]} onLayout={onLayoutReady}>
+      <StatusBar style={statusBarStyle} />
       <Stack
         screenOptions={{
           headerStyle: { backgroundColor: colors.primaryDark },
@@ -158,14 +159,34 @@ export default function RootLayout() {
             animation: 'fade',
           }}
         />
+        <Stack.Screen
+          name="profile/add"
+          options={{
+            title: 'Add Profile',
+            presentation: 'modal',
+          }}
+        />
+        <Stack.Screen
+          name="profile/[id]"
+          options={{
+            title: 'Edit Profile',
+          }}
+        />
       </Stack>
     </View>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <ThemeProvider>
+      <RootLayoutInner />
+    </ThemeProvider>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.surface,
   },
 });

@@ -46,6 +46,19 @@ jest.mock('expo-crypto', () => ({
   randomUUID: jest.fn(() => 'mock-uuid-' + Math.random().toString(36).substring(7)),
 }));
 
+// Mock expo-modules-core (used by alarmSound.ts to check native module availability)
+jest.mock('expo-modules-core', () => ({
+  requireOptionalNativeModule: jest.fn((name: string) => {
+    // Return a truthy stub so tests can exercise the expo-av path
+    if (name === 'ExponentAV') return { __mock: true };
+    return null;
+  }),
+  requireNativeModule: jest.fn((name: string) => {
+    if (name === 'ExponentAV') return { __mock: true };
+    throw new Error(`Cannot find native module '${name}'`);
+  }),
+}));
+
 // Mock expo-av
 jest.mock('expo-av', () => ({
   Audio: {
@@ -65,4 +78,15 @@ jest.mock('expo-av', () => ({
 jest.mock('expo-splash-screen', () => ({
   preventAutoHideAsync: jest.fn().mockResolvedValue(undefined),
   hideAsync: jest.fn().mockResolvedValue(undefined),
+}));
+
+// Mock expo-print
+jest.mock('expo-print', () => ({
+  printToFileAsync: jest.fn().mockResolvedValue({ uri: 'file:///mock/report.pdf' }),
+}));
+
+// Mock expo-sharing
+jest.mock('expo-sharing', () => ({
+  isAvailableAsync: jest.fn().mockResolvedValue(true),
+  shareAsync: jest.fn().mockResolvedValue(undefined),
 }));
