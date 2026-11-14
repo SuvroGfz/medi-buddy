@@ -39,3 +39,10 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Build artifacts
+.builds/
+
+# Generated native directories (CNG)
+android/
+ios/
